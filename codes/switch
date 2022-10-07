@@ -1,0 +1,121 @@
+#include <core.p4>
+#include <v1model.p4>
+
+header Ethernet_t {
+	bit<48> srcAddr;
+	bit<48> dstAddr;
+	bit<16> ethtype;
+}
+header IPv4_t {
+	bit<4> version;
+	bit<4> ihl;
+	bit<8> diffserv;
+	bit<16> totalLen;
+	bit<16> identification;
+	bit<3> flags;
+	bit<13> fragOffset;
+	bit<8> ttl;
+	bit<8> protocol;
+	bit<16> hdrChecksum;
+	bit<32> srcAddr;
+	bit<32> dstAddr;
+	bit<16> optionHeader;
+	bit<304> optionData;
+}
+header TCP_t {
+	bit<16> srcPort;
+	bit<16> dstPort;
+	bit<32> seqNo;
+	bit<32> ackNo;
+	bit<4> dataOffset;
+	bit<4> res;
+	bit<1> cwr;
+	bit<1> ece;
+	bit<1> urg;
+	bit<1> ack;
+	bit<1> psh;
+	bit<1> rst;
+	bit<1> syn;
+	bit<1> fin;
+	bit<16> window;
+	bit<16> checksum;
+	bit<16> urgentPtr;
+}
+
+
+struct metadata {
+	/* empty */
+}
+
+// NOTE: Added new header type to headers struct
+struct headers {
+	ethernet_t   ethernet;
+	myTunnel_t   myTunnel;
+	ipv4_t       ipv4;
+}
+
+parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+
+
+	state parse_Ethernet{
+		packet.extract(hdr.Ethernet);
+		transition parse_IPv4;
+	}
+
+	state parse_IPv4{
+		packet.extract(hdr.IPv4);
+		transition select(hdr.IPv4.protocol) {	
+			6: parse_TCP;
+			default: accept;
+ 		}
+	}
+
+	state parse_TCP{
+		packet.extract(hdr.TCP);
+		transition accept;
+}
+
+
+}
+
+control MyVerifyChecksum(inout headers hdr, inout metadata meta) {   
+    apply {  }
+}
+
+control MyIngress(inout headers hdr,
+                  inout metadata meta,
+                  inout standard_metadata_t standard_metadata) {
+				  	
+	//put your ingress processor's code here
+
+}
+
+control MyEgress(inout headers hdr,
+                 inout metadata meta,
+                 inout standard_metadata_t standard_metadata) {
+    
+	//put your egress processor's code here
+	
+}
+
+control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
+}
+
+control MyDeparser(packet_out packet, in headers hdr) {
+	apply {
+		packet.emit(hdr.Ethernet);
+		packet.emit(hdr.IPv4);
+		packet.emit(hdr.TCP);
+	}
+}
+
+
+V1Switch(
+	MyParser(),
+	MyVerifyChecksum(),
+	MyIngress(),
+	MyEgress(),
+	MyComputeChecksum(),
+	MyDeparser()
+) main;	
+
