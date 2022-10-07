@@ -1,0 +1,15 @@
+from scapy.all import *
+
+class Ethernet(Packet):
+	fields_desc = [ BitField("srcAddr",0,48),  BitField("dstAddr",0,48),  BitField("ethtype",0,16), ]
+
+class IPv4(Packet):
+	fields_desc = [ BitField("version",0,4),  BitField("ihl",0,4),  BitField("diffserv",0,8),  BitField("totalLen",0,16),  BitField("identification",0,16),  BitField("flags",0,3),  BitField("fragOffset",0,13),  BitField("ttl",0,8),  BitField("protocol",0,8),  BitField("hdrChecksum",0,16),  BitField("srcAddr",0,32),  BitField("dstAddr",0,32),  BitField("optionHeader",0,16),  BitField("optionData",0,304), ]
+
+class TCP(Packet):
+	fields_desc = [ BitField("srcPort",0,16),  BitField("dstPort",0,16),  BitField("seqNo",0,32),  BitField("ackNo",0,32),  BitField("dataOffset",0,4),  BitField("res",0,4),  BitField("cwr",0,1),  BitField("ece",0,1),  BitField("urg",0,1),  BitField("ack",0,1),  BitField("psh",0,1),  BitField("rst",0,1),  BitField("syn",0,1),  BitField("fin",0,1),  BitField("window",0,16),  BitField("checksum",0,16),  BitField("urgentPtr",0,16), ]
+
+
+bind_layers(Ethernet,IPv4)
+bind_layers(IPv4,TCP,protocol=6)
+
