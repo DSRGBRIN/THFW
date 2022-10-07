@@ -1,0 +1,15 @@
+from Parser_All_class import *
+from scapy.all import sendp, ICMP, ARP, TCP
+
+pkts = []
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/ARP() )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x01)/ICMP() )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x06)/tcp(srcPort=12345,dstPort=22) )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x11)/udp(srcPort=12345,dstPort=22) )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/mpls(Label=101)/ARP() )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/mpls(Label=101)/mpls(Label=100)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x01) )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/mpls(Label=101)/mpls(Label=100)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x06)/tcp(srcPort=12345,dstPort=22) )
+pkts.append( ethernet(srcAddr=0x01,dstAddr=0x02)/mpls(Label=101)/mpls(Label=100)/ipv4(srcAddr=0x0a000a0a,dstAddr=0x0a00140a,protocol=0x11)/udp(srcPort=12345,dstPort=22) )
+for pkt in pkts:
+	print pkt.summary()
+	sendp(pkt, iface="eth0")
